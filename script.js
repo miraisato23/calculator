@@ -45,7 +45,13 @@ const clearButton = document.querySelector("#clear");
 const backspaceButton = document.querySelector("#backspace");
 const decimalButton = document.querySelector("#decimal");
 
-// ----- Display -----
+function getActiveNumber() {
+  if (operator === "") {
+    return firstNumber;
+  }
+  return secondNumber;
+}
+
 function updateDisplay() {
   if (operator !== "" && secondNumber !== "") {
     display.textContent = secondNumber;
@@ -54,7 +60,30 @@ function updateDisplay() {
   } else {
     display.textContent = "0";
   }
+
+  // Disable "." if the number being typed already has one
+  decimalButton.disabled = !resultShown && getActiveNumber().includes(".");
+  decimalButton.addEventListener("click", inputDecimal);
 }
+
+function handleBackspace() {
+  // Don't edit a finished answer
+  if (resultShown) {
+    return;
+  }
+
+  if (operator === "") {
+    firstNumber = firstNumber.slice(0, -1);
+  } else if (secondNumber !== "") {
+    secondNumber = secondNumber.slice(0, -1);
+  } else {
+    operator = ""; // undo the operator you just picked
+  }
+
+  updateDisplay();
+}
+
+backspaceButton.addEventListener("click", handleBackspace);
 
 // ----- Reset everything -----
 function resetState() {
@@ -90,6 +119,30 @@ function inputDigit(digit) {
     firstNumber = appendDigit(firstNumber, digit);
   } else {
     secondNumber = appendDigit(secondNumber, digit);
+  }
+
+  updateDisplay();
+}
+
+function appendDecimal(current) {
+  if (current.includes(".")) {
+    return current; // already has a decimal point
+  }
+  if (current === "") {
+    return "0."; // typing "." first gives "0."
+  }
+  return current + ".";
+}
+
+function inputDecimal() {
+  if (resultShown) {
+    resetState();
+  }
+
+  if (operator === "") {
+    firstNumber = appendDecimal(firstNumber);
+  } else {
+    secondNumber = appendDecimal(secondNumber);
   }
 
   updateDisplay();
@@ -184,3 +237,24 @@ equalsButton.addEventListener("click", handleEquals);
 
 
 updateDisplay();
+
+
+document.addEventListener("keydown", function (event) {
+  const key = event.key;
+
+  if ("0123456789".includes(key)) {
+    inputDigit(key);
+  } else if (key === ".") {
+    inputDecimal();
+  } else if (key === "+" || key === "-" || key === "*" || key === "/") {
+    event.preventDefault();
+    handleOperator(key);
+  } else if (key === "Enter" || key === "=") {
+    event.preventDefault();
+    handleEquals();
+  } else if (key === "Backspace") {
+    handleBackspace();
+  } else if (key === "Escape") {
+    clearCalculator();
+  }
+});
