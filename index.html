@@ -6,6 +6,43 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <div class="calculator">
+      <div id="display">123456</div>
+
+      <div class="row">
+        <button id="clear" class="wide">AC</button>
+        <button id="backspace">⌫</button>
+        <button class="operator" data-operator="/">÷</button>
+      </div>
+
+      <div class="row">
+        <button class="digit" data-digit="7">7</button>
+        <button class="digit" data-digit="8">8</button>
+        <button class="digit" data-digit="9">9</button>
+        <button class="operator" data-operator="*">×</button>
+      </div>
+
+      <div class="row">
+        <button class="digit" data-digit="4">4</button>
+        <button class="digit" data-digit="5">5</button>
+        <button class="digit" data-digit="6">6</button>
+        <button class="operator" data-operator="-">−</button>
+      </div>
+
+      <div class="row">
+        <button class="digit" data-digit="1">1</button>
+        <button class="digit" data-digit="2">2</button>
+        <button class="digit" data-digit="3">3</button>
+        <button class="operator" data-operator="+">+</button>
+      </div>
+
+      <div class="row">
+        <button class="digit wide" data-digit="0">0</button>
+        <button id="decimal">.</button>
+        <button id="equals" class="equals">=</button>
+      </div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>
