@@ -1,3 +1,11 @@
+let firstNumber = "";
+let operator = "";
+let secondNumber = "";
+let resultShown = false;
+
+
+
+
 function add(a, b) {
   return a + b;
 }
