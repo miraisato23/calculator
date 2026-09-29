@@ -95,6 +95,75 @@ function inputDigit(digit) {
   updateDisplay();
 }
 
+
+// ----- Errors -----
+function showError(message) {
+  resetState();
+  updateDisplay();
+  display.textContent = message;
+}
+
+// ----- Calculate one pair of numbers -----
+function calculate() {
+  const a = Number(firstNumber);
+  const b = Number(secondNumber);
+
+  // Dividing by zero: snarky message, no crash
+  if (operator === "/" && b === 0) {
+    showError("Nice try! Can't divide by 0.");
+    return null;
+  }
+
+  const result = operate(operator, a, b);
+
+  // Round long decimals, then turn back into text
+  return String(parseFloat(result.toFixed(8)));
+}
+
+// ----- Operators -----
+function handleOperator(newOperator) {
+  if (firstNumber === "") {
+    firstNumber = "0";
+  }
+
+  // We have a full pair already: calculate it first
+  if (operator !== "" && secondNumber !== "") {
+    const result = calculate();
+    if (result === null) {
+      return; // there was an error, stop here
+    }
+    firstNumber = result;
+    secondNumber = "";
+  }
+
+  operator = newOperator;
+  resultShown = false;
+  updateDisplay();
+}
+
+// ----- Equals -----
+function handleEquals() {
+  // Not enough info to calculate: do nothing
+  if (firstNumber === "" || operator === "" || secondNumber === "") {
+    return;
+  }
+
+  const result = calculate();
+  if (result === null) {
+    return;
+  }
+
+  firstNumber = result;
+  operator = "";
+  secondNumber = "";
+  resultShown = true;
+  updateDisplay();
+}
+
+
+
+
+
 // ----- Connect the buttons -----
 digitButtons.forEach(function (button) {
   button.addEventListener("click", function () {
@@ -103,5 +172,15 @@ digitButtons.forEach(function (button) {
 });
 
 clearButton.addEventListener("click", clearCalculator);
+
+
+operatorButtons.forEach(function (button) {
+  button.addEventListener("click", function () {
+    handleOperator(button.dataset.operator);
+  });
+});
+
+equalsButton.addEventListener("click", handleEquals);
+
 
 updateDisplay();
