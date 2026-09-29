@@ -1,11 +1,4 @@
-let firstNumber = "";
-let operator = "";
-let secondNumber = "";
-let resultShown = false;
-
-
-
-
+// ----- Math functions -----
 function add(a, b) {
   return a + b;
 }
@@ -34,9 +27,13 @@ function operate(operator, a, b) {
   }
 }
 
+// ----- State -----
+let firstNumber = "";
+let operator = "";
+let secondNumber = "";
+let resultShown = false;
 
-
-// ----- Grab elements from the page -----
+// ----- Elements -----
 const display = document.querySelector("#display");
 const digitButtons = document.querySelectorAll(".digit");
 const operatorButtons = document.querySelectorAll(".operator");
@@ -45,6 +42,7 @@ const clearButton = document.querySelector("#clear");
 const backspaceButton = document.querySelector("#backspace");
 const decimalButton = document.querySelector("#decimal");
 
+// ----- Display -----
 function getActiveNumber() {
   if (operator === "") {
     return firstNumber;
@@ -61,31 +59,10 @@ function updateDisplay() {
     display.textContent = "0";
   }
 
-  // Disable "." if the number being typed already has one
   decimalButton.disabled = !resultShown && getActiveNumber().includes(".");
-  decimalButton.addEventListener("click", inputDecimal);
 }
 
-function handleBackspace() {
-  // Don't edit a finished answer
-  if (resultShown) {
-    return;
-  }
-
-  if (operator === "") {
-    firstNumber = firstNumber.slice(0, -1);
-  } else if (secondNumber !== "") {
-    secondNumber = secondNumber.slice(0, -1);
-  } else {
-    operator = ""; // undo the operator you just picked
-  }
-
-  updateDisplay();
-}
-
-backspaceButton.addEventListener("click", handleBackspace);
-
-// ----- Reset everything -----
+// ----- Reset / errors -----
 function resetState() {
   firstNumber = "";
   operator = "";
@@ -98,19 +75,24 @@ function clearCalculator() {
   updateDisplay();
 }
 
-// ----- Digits -----
+function showError(message) {
+  resetState();
+  updateDisplay();
+  display.textContent = message;
+}
+
+// ----- Typing numbers -----
 function appendDigit(current, digit) {
   if (current.length >= 12) {
-    return current; // too long, ignore extra digits
+    return current;
   }
   if (current === "0") {
-    return digit; // replace a lone 0 so we don't get "05"
+    return digit;
   }
   return current + digit;
 }
 
 function inputDigit(digit) {
-  // If the screen shows an answer, a new digit starts a fresh calculation
   if (resultShown) {
     resetState();
   }
@@ -126,10 +108,10 @@ function inputDigit(digit) {
 
 function appendDecimal(current) {
   if (current.includes(".")) {
-    return current; // already has a decimal point
+    return current;
   }
   if (current === "") {
-    return "0."; // typing "." first gives "0."
+    return "0.";
   }
   return current + ".";
 }
@@ -148,42 +130,45 @@ function inputDecimal() {
   updateDisplay();
 }
 
+function handleBackspace() {
+  if (resultShown) {
+    return;
+  }
 
-// ----- Errors -----
-function showError(message) {
-  resetState();
+  if (operator === "") {
+    firstNumber = firstNumber.slice(0, -1);
+  } else if (secondNumber !== "") {
+    secondNumber = secondNumber.slice(0, -1);
+  } else {
+    operator = "";
+  }
+
   updateDisplay();
-  display.textContent = message;
 }
 
-// ----- Calculate one pair of numbers -----
+// ----- Calculating -----
 function calculate() {
   const a = Number(firstNumber);
   const b = Number(secondNumber);
 
-  // Dividing by zero: snarky message, no crash
   if (operator === "/" && b === 0) {
     showError("Nice try! Can't divide by 0.");
     return null;
   }
 
   const result = operate(operator, a, b);
-
-  // Round long decimals, then turn back into text
   return String(parseFloat(result.toFixed(8)));
 }
 
-// ----- Operators -----
 function handleOperator(newOperator) {
   if (firstNumber === "") {
     firstNumber = "0";
   }
 
-  // We have a full pair already: calculate it first
   if (operator !== "" && secondNumber !== "") {
     const result = calculate();
     if (result === null) {
-      return; // there was an error, stop here
+      return;
     }
     firstNumber = result;
     secondNumber = "";
@@ -194,9 +179,7 @@ function handleOperator(newOperator) {
   updateDisplay();
 }
 
-// ----- Equals -----
 function handleEquals() {
-  // Not enough info to calculate: do nothing
   if (firstNumber === "" || operator === "" || secondNumber === "") {
     return;
   }
@@ -213,19 +196,12 @@ function handleEquals() {
   updateDisplay();
 }
 
-
-
-
-
-// ----- Connect the buttons -----
+// ----- Connect buttons -----
 digitButtons.forEach(function (button) {
   button.addEventListener("click", function () {
     inputDigit(button.dataset.digit);
   });
 });
-
-clearButton.addEventListener("click", clearCalculator);
-
 
 operatorButtons.forEach(function (button) {
   button.addEventListener("click", function () {
@@ -234,11 +210,11 @@ operatorButtons.forEach(function (button) {
 });
 
 equalsButton.addEventListener("click", handleEquals);
+clearButton.addEventListener("click", clearCalculator);
+backspaceButton.addEventListener("click", handleBackspace);
+decimalButton.addEventListener("click", inputDecimal);
 
-
-updateDisplay();
-
-
+// ----- Keyboard support -----
 document.addEventListener("keydown", function (event) {
   const key = event.key;
 
@@ -258,3 +234,6 @@ document.addEventListener("keydown", function (event) {
     clearCalculator();
   }
 });
+
+// ----- Start -----
+updateDisplay();
